@@ -110,7 +110,7 @@ function renderTodos() {
   if (list.length === 0) {
     const empty = document.createElement("li");
     empty.className = "todo";
-    empty.innerHTML = `<div class="todo-title"><strong>Inga todos ännu</strong><span>Tryck “New todo” för att lägga till</span></div>`;
+    empty.innerHTML = `<div class="todo-title"><strong>No todos yet</strong><span>Press “New todo” to add</span></div>`;
     todosEl.appendChild(empty);
     return;
   }
