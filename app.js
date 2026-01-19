@@ -1,5 +1,6 @@
 // ----- State & Config -----
 const STORAGE_KEY = "thingsish:v1";
+
 const defaultData = {
   projects: [
     { id: "inbox", name: "Inbox" },
@@ -15,7 +16,7 @@ const defaultData = {
 
 let data = loadData();
 
-// ----- Elements -----
+// ----- UI Elements Cache -----
 const elements = {
   projectError: document.querySelector("#projectError"),
   projectsEl: document.querySelector("#projects"),
@@ -49,37 +50,49 @@ function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-// ----- Network Logic -----
+// ----- Network & Read-Only Logic -----
 function isOnline() { return navigator.onLine; }
 
+/**
+ * Instantly updates the UI when network status changes
+ * Disables all mutation triggers (buttons, checkboxes, trash cans)
+ */
 function applyNetworkUI() {
   const online = isOnline();
   const { netBadge, offlineHint, newTodoBtn, addProjectBtn, todoForm, projectForm } = elements;
 
+  // Update Global Indicators
   netBadge.textContent = online ? "Online" : "Offline";
   netBadge.className = `badge ${online ? 'online' : 'offline'}`;
   offlineHint.hidden = online;
 
+  // Update Main Action Buttons
   newTodoBtn.disabled = !online;
   addProjectBtn.disabled = !online;
 
+  // Disable form fields if a modal is currently open
   [...todoForm.querySelectorAll("input, select, button")].forEach(el => el.disabled = !online);
   [...projectForm.querySelectorAll("input, button")].forEach(el => el.disabled = !online);
   
-  renderProjects();
+  // INSTANT UPDATE: Toggle all existing trash cans and checkboxes in the DOM
+  document.querySelectorAll(".project-del-btn, .del-btn, .todo-checkbox").forEach(el => {
+    el.disabled = !online;
+  });
 }
 
 window.addEventListener("online", applyNetworkUI);
 window.addEventListener("offline", applyNetworkUI);
 
-// ----- Rendering -----
+// ----- Rendering Logic -----
 function render() {
   renderProjects();
   renderTodos();
   renderTodoProjectSelect();
+  
   const p = data.projects.find(x => x.id === data.activeProjectId);
   elements.listTitleEl.textContent = p ? p.name : "Inbox";
-  applyNetworkUI();
+  
+  applyNetworkUI(); // Sync network states after rendering
 }
 
 function renderProjects() {
@@ -90,6 +103,7 @@ function renderProjects() {
     const container = document.createElement("div");
     container.className = "project-item";
     
+    // Project Selection Button
     const btn = document.createElement("button");
     btn.className = "project";
     btn.setAttribute("aria-current", p.id === data.activeProjectId ? "page" : "false");
@@ -102,20 +116,21 @@ function renderProjects() {
     };
     container.appendChild(btn);
 
+    // Trash Can Button
     const delBtn = document.createElement("button");
     delBtn.className = "project-del-btn";
     delBtn.innerHTML = "🗑️";
-    
     delBtn.disabled = !online;
 
     if (p.id === "inbox") {
+      // Invisible spacer for Inbox to maintain alignment
       delBtn.style.visibility = "hidden";
       delBtn.style.pointerEvents = "none";
     } else {
-      delBtn.title = online ? "Ta bort lista" : "Går ej att ta bort i offline-läge";
+      delBtn.title = online ? "Delete list" : "Offline: Cannot delete";
       delBtn.onclick = (e) => {
         e.stopPropagation();
-        if (online) deleteProject(p.id, p.name);
+        if (isOnline()) deleteProject(p.id, p.name);
       };
     }
     
@@ -124,26 +139,8 @@ function renderProjects() {
   });
 }
 
-// Delete project and its todos
-function deleteProject(id, name) {
-  if (!isOnline()) return;
-  
-  const confirmDelete = confirm(`Do you want to remove "${name}" and all its todos?`);
-  if (!confirmDelete) return;
-
-  data.todos = data.todos.filter(t => t.projectId !== id);
-  
-  data.projects = data.projects.filter(p => p.id !== id);
-  
-  if (data.activeProjectId === id) {
-    data.activeProjectId = "inbox";
-  }
-
-  saveData();
-  render();
-}
-
 function renderTodos() {
+  const online = isOnline(); // Ensure variable is defined for the template
   elements.todosEl.innerHTML = "";
   const list = data.todos.filter(t => t.projectId === data.activeProjectId);
 
@@ -162,22 +159,53 @@ function renderTodos() {
     const li = document.createElement("li");
     li.className = "todo";
     li.innerHTML = `
-      <input type="checkbox" ${t.done ? "checked" : ""} ${!isOnline() ? "disabled" : ""}>
-      <div class="todo-title"><strong>${escapeHtml(t.title)}</strong><span>${t.due ? formatDate(t.due) : "No due date"}</span></div>
+      <input type="checkbox" class="todo-checkbox" ${t.done ? "checked" : ""} ${!online ? "disabled" : ""}>
+      <div class="todo-title">
+        <strong>${escapeHtml(t.title)}</strong>
+        <span>${t.due ? formatDate(t.due) : "No due date"}</span>
+      </div>
       <div class="todo-actions">
         <span class="pill">${projectNameById(t.projectId)}</span>
-        <button class="icon-btn del-btn" ${!isOnline() ? "disabled" : ""}>🗑️</button>
+        <button class="icon-btn del-btn" ${!online ? "disabled" : ""}>🗑️</button>
       </div>`;
 
-    li.querySelector("input").onchange = (e) => { t.done = e.target.checked; saveData(); };
-    li.querySelector(".del-btn").onclick = () => { data.todos = data.todos.filter(x => x.id !== t.id); saveData(); render(); };
+    // Interaction Handlers
+    li.querySelector(".todo-checkbox").onchange = (e) => {
+      if (!isOnline()) return;
+      t.done = e.target.checked;
+      saveData();
+    };
+
+    li.querySelector(".del-btn").onclick = () => {
+      if (!isOnline()) return;
+      data.todos = data.todos.filter(x => x.id !== t.id);
+      saveData();
+      render();
+    };
+
     elements.todosEl.appendChild(li);
   });
 }
 
 function renderTodoProjectSelect() {
-  elements.todoProject.innerHTML = data.projects.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("");
+  elements.todoProject.innerHTML = data.projects.map(p => 
+    `<option value="${p.id}">${escapeHtml(p.name)}</option>`
+  ).join("");
   elements.todoProject.value = data.activeProjectId;
+}
+
+// ----- Project Deletion -----
+function deleteProject(id, name) {
+  if (!isOnline()) return;
+  if (!confirm(`Do you want to remove "${name}" and all its todos?`)) return;
+
+  data.todos = data.todos.filter(t => t.projectId !== id);
+  data.projects = data.projects.filter(p => p.id !== id);
+  
+  if (data.activeProjectId === id) data.activeProjectId = "inbox";
+
+  saveData();
+  render();
 }
 
 // ----- Modal & Drawer Logic -----
@@ -220,6 +248,7 @@ document.querySelector("#cancelTodo").onclick = () => elements.todoModal.close()
 document.querySelector("#closeProjectModal").onclick = closeProject;
 document.querySelector("#cancelProject").onclick = closeProject;
 
+// Form Submit: New Todo
 elements.todoForm.onsubmit = (e) => {
   e.preventDefault();
   data.todos.unshift({
@@ -234,15 +263,19 @@ elements.todoForm.onsubmit = (e) => {
   render();
 };
 
+// Form Submit: New Project (with duplicate check)
 elements.projectForm.onsubmit = (e) => {
   e.preventDefault();
   const name = elements.projectName.value.trim();
-  if (data.projects.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-    elements.projectError.textContent = `name "${name}" is already used`;
+  
+  const nameExists = data.projects.some(p => p.name.toLowerCase() === name.toLowerCase());
+  if (nameExists) {
+    elements.projectError.textContent = `Name "${name}" is already used`;
     elements.projectError.hidden = false;
-    elements.projectName.style.borderColor = "#dc2626";
+    elements.projectName.style.borderColor = "var(--danger)";
     return;
   }
+
   const id = "p-" + crypto.randomUUID().slice(0, 8);
   data.projects.push({ id, name });
   data.activeProjectId = id;
@@ -251,17 +284,19 @@ elements.projectForm.onsubmit = (e) => {
   render();
 };
 
+// Clear error state while typing
 elements.projectName.oninput = () => {
   elements.projectError.hidden = true;
   elements.projectName.style.borderColor = "";
 };
 
+// Mobile Hamburger Menu
 elements.menuBtn.onclick = () => {
   if (window.innerWidth <= 860) openDrawer();
 };
-
 elements.overlay.onclick = closeDrawer;
 
+// Auto-close drawer on window resize
 window.onresize = () => {
   if (window.innerWidth > 860 && elements.sidebar.classList.contains("open")) closeDrawer();
 };
@@ -272,9 +307,10 @@ function projectNameById(id) { return data.projects.find(p => p.id === id)?.name
 function formatDate(iso) { return new Date(iso + "T00:00:00").toLocaleDateString("sv-SE", { year: "numeric", month: "short", day: "numeric" }); }
 function escapeHtml(str) { return str.replace(/[&<>"']/g, m => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" }[m])); }
 
-// Register SW
+// SW Registration
 if ("serviceWorker" in navigator) {
   window.onload = () => navigator.serviceWorker.register("./sw.js").catch(() => {});
 }
 
+// Initial Render
 render();
