@@ -7,18 +7,18 @@
 
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#f4f5f7" />
+  
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
   <div class="app">
-    <!-- Header -->
     <header class="topbar">
       <button class="icon-btn" id="menuBtn" aria-label="Öppna meny" aria-expanded="false">☰</button>
 
       <div class="titlewrap">
         <h1 class="apptitle">Things-ish</h1>
-        <span class="badge" id="netBadge" aria-live="polite">Online</span>
+        <span class="badge online" id="netBadge" aria-live="polite">Online</span>
       </div>
 
       <div class="topbar-actions">
@@ -26,9 +26,7 @@
       </div>
     </header>
 
-    <!-- Layout -->
     <div class="layout">
-      <!-- Sidebar -->
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-head">
           <h2 class="sidebar-title">Projects</h2>
@@ -41,7 +39,6 @@
         </div>
       </aside>
 
-      <!-- Main -->
       <main class="main">
         <div class="main-head">
           <h2 class="listtitle" id="listTitle">Inbox</h2>
@@ -56,10 +53,8 @@
       </main>
     </div>
 
-    <!-- Drawer overlay (mobile) -->
     <div class="overlay" id="overlay" hidden></div>
 
-    <!-- Modal: New Todo -->
     <dialog class="modal" id="todoModal">
       <form class="modal-inner" id="todoForm" method="dialog">
         <div class="modal-head">
@@ -89,7 +84,6 @@
       </form>
     </dialog>
 
-    <!-- Modal: New Project -->
     <dialog class="modal" id="projectModal">
       <form class="modal-inner" id="projectForm" method="dialog">
         <div class="modal-head">

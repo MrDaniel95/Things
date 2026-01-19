@@ -61,7 +61,7 @@ body {
   gap: 12px;
   padding: 12px 14px;
   border-top: 1px solid var(--line);
-  min-height: 60px; /* Ger lite mer luft */
+  min-height: 60px;
 }
 
 .topbar {
@@ -134,3 +134,50 @@ body {
 .modal-inner { padding: 20px; }
 .field { display: flex; flex-direction: column; gap: 5px; margin: 15px 0; }
 .field input, .field select { padding: 12px; border-radius: 12px; border: 1px solid var(--line); }
+
+.project-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+.project-item .project {
+  flex: 1;
+}
+
+.project-del-btn {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 8px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-radius: 8px;
+}
+
+.project-item:hover .project-del-btn {
+  opacity: 0.5;
+}
+
+.project-del-btn:hover {
+  opacity: 1 !important;
+  background: #fee2e2;
+}
+
+.project-del-btn:disabled {
+  opacity: 0.2 !important;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.project-del-btn:disabled:hover {
+  background: transparent !important;
+}
+
+@media (max-width: 860px) {
+  .project-del-btn {
+    opacity: 0.6;
+  }
+}

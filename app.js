@@ -65,6 +65,8 @@ function applyNetworkUI() {
 
   [...todoForm.querySelectorAll("input, select, button")].forEach(el => el.disabled = !online);
   [...projectForm.querySelectorAll("input, button")].forEach(el => el.disabled = !online);
+  
+  renderProjects();
 }
 
 window.addEventListener("online", applyNetworkUI);
@@ -81,8 +83,13 @@ function render() {
 }
 
 function renderProjects() {
+  const online = isOnline();
   elements.projectsEl.innerHTML = "";
+  
   data.projects.forEach(p => {
+    const container = document.createElement("div");
+    container.className = "project-item";
+    
     const btn = document.createElement("button");
     btn.className = "project";
     btn.setAttribute("aria-current", p.id === data.activeProjectId ? "page" : "false");
@@ -93,8 +100,47 @@ function renderProjects() {
       render();
       closeDrawer();
     };
-    elements.projectsEl.appendChild(btn);
+    container.appendChild(btn);
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "project-del-btn";
+    delBtn.innerHTML = "🗑️";
+    
+    delBtn.disabled = !online;
+
+    if (p.id === "inbox") {
+      delBtn.style.visibility = "hidden";
+      delBtn.style.pointerEvents = "none";
+    } else {
+      delBtn.title = online ? "Ta bort lista" : "Går ej att ta bort i offline-läge";
+      delBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (online) deleteProject(p.id, p.name);
+      };
+    }
+    
+    container.appendChild(delBtn);
+    elements.projectsEl.appendChild(container);
   });
+}
+
+// Delete project and its todos
+function deleteProject(id, name) {
+  if (!isOnline()) return;
+  
+  const confirmDelete = confirm(`Vill du verkligen ta bort listan "${name}" och alla dess todos?`);
+  if (!confirmDelete) return;
+
+  data.todos = data.todos.filter(t => t.projectId !== id);
+  
+  data.projects = data.projects.filter(p => p.id !== id);
+  
+  if (data.activeProjectId === id) {
+    data.activeProjectId = "inbox";
+  }
+
+  saveData();
+  render();
 }
 
 function renderTodos() {
