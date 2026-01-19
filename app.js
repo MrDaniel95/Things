@@ -27,6 +27,7 @@ function saveData() {
 let data = loadData();
 
 // ----- Elements -----
+const projectError = document.querySelector("#projectError");
 const projectsEl = document.querySelector("#projects");
 const todosEl = document.querySelector("#todos");
 const listTitleEl = document.querySelector("#listTitle");
@@ -251,9 +252,23 @@ projectForm.addEventListener("submit", (e) => {
   const name = projectName.value.trim();
   if (!name) return;
 
+  // Kontrollerar dubblett
+  const nameExists = data.projects.some(
+    (p) => p.name.toLowerCase() === name.toLowerCase()
+  );
+
+  if (nameExists) {
+    projectError.textContent = `Namnet "${name}" används redan`;
+    projectError.hidden = false;
+    projectName.style.borderColor = "#dc2626";
+    projectName.focus();
+    return;
+  }
+
   const id = "p-" + crypto.randomUUID().slice(0, 8);
   data.projects.push({ id, name });
   data.activeProjectId = id;
+  
   saveData();
   closeProject();
   render();
@@ -297,6 +312,21 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try { await navigator.serviceWorker.register("./sw.js"); } catch {}
   });
+}
+
+// Remove error state on input
+projectName.addEventListener("input", () => {
+  projectError.hidden = true;
+  projectName.style.borderColor = ""; 
+});
+
+// uppdates closeProject function to reset error state
+function closeProject() {
+  if (projectModal.open) {
+    projectModal.close();
+    projectError.hidden = true;
+    projectName.style.borderColor = "";
+  }
 }
 
 // Init

@@ -234,3 +234,12 @@ body{
   gap:10px;
   margin-top:14px;
 }
+
+/* Styling for error message */
+.error-text {
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: block;
+}
