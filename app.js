@@ -59,22 +59,26 @@ function isOnline() { return navigator.onLine; }
  */
 function applyNetworkUI() {
   const online = isOnline();
-  const { netBadge, offlineHint, newTodoBtn, addProjectBtn, todoForm, projectForm } = elements;
+  const { netBadge, offlineHint, newTodoBtn, addProjectBtn, todoForm, projectForm, menuBtn } = elements;
 
-  // Update Global Indicators
+  // 1. Update Global Indicators
   netBadge.textContent = online ? "Online" : "Offline";
   netBadge.className = `badge ${online ? 'online' : 'offline'}`;
   offlineHint.hidden = online;
 
-  // Update Main Action Buttons
+  // 2. Disable Navigation
+  menuBtn.disabled = !online;
+  if (!online) closeDrawer();
+
+  // 3. Update Main Action Buttons
   newTodoBtn.disabled = !online;
   addProjectBtn.disabled = !online;
 
-  // Disable form fields if a modal is currently open
+  // 4. Disable form fields if a modal is currently open
   [...todoForm.querySelectorAll("input, select, button")].forEach(el => el.disabled = !online);
   [...projectForm.querySelectorAll("input, button")].forEach(el => el.disabled = !online);
   
-  // INSTANT UPDATE: Toggle all existing trash cans and checkboxes in the DOM
+  // 5. Toggle all existing trash cans and checkboxes in the DOM
   document.querySelectorAll(".project-del-btn, .del-btn, .todo-checkbox").forEach(el => {
     el.disabled = !online;
   });

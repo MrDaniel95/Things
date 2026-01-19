@@ -135,3 +135,7 @@ button:disabled, input:disabled, select:disabled {
 .field { display: flex; flex-direction: column; gap: 5px; margin: 15px 0; }
 .field input, .field select { padding: 12px; border-radius: 12px; border: 1px solid var(--line); font: inherit; }
 .error-text { color: var(--danger); font-size: 12px; font-weight: 600; margin-bottom: 4px; display: block; }
+
+#menuBtn:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1);}
+
+#menuBtn { transition: opacity 0.3s ease, filter 0.3s ease;}
