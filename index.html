@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Things-ish</title>
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#f4f5f7" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="topbar">
+      <button class="icon-btn" id="menuBtn" aria-label="Öppna meny" aria-expanded="false">☰</button>
+
+      <div class="titlewrap">
+        <h1 class="apptitle">Things-ish</h1>
+        <span class="badge" id="netBadge" aria-live="polite">Online</span>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="btn primary" id="newTodoBtn">New todo</button>
+      </div>
+    </header>
+
+    <!-- Layout -->
+    <div class="layout">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-head">
+          <h2 class="sidebar-title">Projects</h2>
+        </div>
+
+        <nav class="projects" id="projects"></nav>
+
+        <div class="sidebar-foot">
+          <button class="btn ghost" id="addProjectBtn">+ New project</button>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="main">
+        <div class="main-head">
+          <h2 class="listtitle" id="listTitle">Inbox</h2>
+          <p class="hint" id="offlineHint" hidden>
+            Offline: read-only (inga ändringar)
+          </p>
+        </div>
+
+        <section class="card">
+          <ul class="todos" id="todos"></ul>
+        </section>
+      </main>
+    </div>
+
+    <!-- Drawer overlay (mobile) -->
+    <div class="overlay" id="overlay" hidden></div>
+
+    <!-- Modal: New Todo -->
+    <dialog class="modal" id="todoModal">
+      <form class="modal-inner" id="todoForm" method="dialog">
+        <div class="modal-head">
+          <h3>New todo</h3>
+          <button class="icon-btn" type="button" id="closeModal" aria-label="Stäng">✕</button>
+        </div>
+
+        <label class="field">
+          <span>Title</span>
+          <input id="todoTitle" name="title" type="text" placeholder="e.g. Prepare presentation" required />
+        </label>
+
+        <label class="field">
+          <span>Due date</span>
+          <input id="todoDue" name="due" type="date" />
+        </label>
+
+        <label class="field">
+          <span>Project</span>
+          <select id="todoProject" name="project"></select>
+        </label>
+
+        <div class="modal-actions">
+          <button class="btn" type="button" id="cancelTodo">Cancel</button>
+          <button class="btn primary" type="submit">Add</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Modal: New Project -->
+    <dialog class="modal" id="projectModal">
+      <form class="modal-inner" id="projectForm" method="dialog">
+        <div class="modal-head">
+          <h3>New project</h3>
+          <button class="icon-btn" type="button" id="closeProjectModal" aria-label="Stäng">✕</button>
+        </div>
+
+        <label class="field">
+          <span>Name</span>
+          <input id="projectName" name="name" type="text" placeholder="e.g. Work" required />
+        </label>
+
+        <div class="modal-actions">
+          <button class="btn" type="button" id="cancelProject">Cancel</button>
+          <button class="btn primary" type="submit">Add</button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
