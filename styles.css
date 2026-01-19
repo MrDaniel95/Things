@@ -97,9 +97,17 @@ body {
 .btn.primary { background: var(--accent); color: white; border: 0; }
 
 .icon-btn {
-  border: 1px solid var(--line); background: rgba(255,255,255,.75);
-  border-radius: 12px; padding: 8px 10px; cursor: pointer;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.75);
+  border-radius: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
 }
+
+.icon-btn:hover {
+opacity: 1 !important; background: #fee2e2;
+}
+
 
 /* Global Disabled State (Offline mode) */
 button:disabled, input:disabled, select:disabled {
