@@ -128,7 +128,7 @@ function renderProjects() {
 function deleteProject(id, name) {
   if (!isOnline()) return;
   
-  const confirmDelete = confirm(`Vill du verkligen ta bort listan "${name}" och alla dess todos?`);
+  const confirmDelete = confirm(`Do you want to remove "${name}" and all its todos?`);
   if (!confirmDelete) return;
 
   data.todos = data.todos.filter(t => t.projectId !== id);
@@ -238,7 +238,7 @@ elements.projectForm.onsubmit = (e) => {
   e.preventDefault();
   const name = elements.projectName.value.trim();
   if (data.projects.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-    elements.projectError.textContent = `Namnet "${name}" används redan`;
+    elements.projectError.textContent = `name "${name}" is already used`;
     elements.projectError.hidden = false;
     elements.projectName.style.borderColor = "#dc2626";
     return;
